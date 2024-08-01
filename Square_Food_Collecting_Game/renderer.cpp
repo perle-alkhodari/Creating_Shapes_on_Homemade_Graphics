@@ -8,10 +8,11 @@ void ClearScreen(int color);
 unsigned int* SetPixelPointer(Point p);
 void DrawPoint(Point p, int color);
 void DrawLine(Point p1, Point p2, int color);
-void DrawRect(Point p, int width, int height, int color);
-void DrawRectDynamicPosition(float x, float y, float width, float height, int color);
-void DrawRectDynamicPosAndSize(float x, float y, float width, float height, int color);
-void DrawTriangle(Point p1, Point p2, Point p3, int color);
+void DrawRect(Point p, int width, int height, int color, bool fill);
+void DrawRectDynamicPosition(float x, float y, float width, float height, int color, bool fill);
+void DrawRectDynamicPosAndSize(float x, float y, float width, float height, int color, bool fill);
+void DrawTriangle(Point p1, Point p2, Point p3, int color, bool fill);
+void DrawSquare(Point p, int size, int color, bool fill);
 
 
 void Render(){ 
@@ -52,6 +53,10 @@ void DrawPoint(Point p, int color = DEFAULT_COLOR) {
 }
 
 void DrawLine(Point p1, Point p2, int color = DEFAULT_COLOR) {
+	// Making sure nothing is out of range
+	Bracket(renderBuffer.width, renderBuffer.height, p1);
+	Bracket(renderBuffer.width, renderBuffer.height, p2);
+
 	// Bresenham's line drawing algo
 	int dx = abs(p2.x - p1.x);
 	int sx = p1.x < p2.x ? 1 : -1;
@@ -77,22 +82,50 @@ void DrawLine(Point p1, Point p2, int color = DEFAULT_COLOR) {
 	
 }
 
-void DrawRect(Point p, int width, int height, int color = DEFAULT_COLOR) {
+void DrawRect(Point p, int width, int height, int color = DEFAULT_COLOR, bool fill = true) {
 
 	p.x = Bracket(0, renderBuffer.width, p.x);
-	int posX2 = Bracket(0, renderBuffer.width, p.x+width);
+	int posX2 = Bracket(0, renderBuffer.width, p.x + width);
 	p.y = Bracket(0, renderBuffer.height, p.y);
-	int posY2 = Bracket(0, renderBuffer.height, p.y+height);
+	int posY2 = Bracket(0, renderBuffer.height, p.y + height);
 
-	for (int i = p.y; i < posY2; i++) {
-		unsigned int* pixel = (unsigned int*)renderBuffer.memory + (((i)*renderBuffer.width) + p.x);
-		for (int j = p.x; j < posX2; j++) {
-			*pixel++ = color;
+	if (fill) {
+		for (int i = p.y; i < posY2; i++) {
+			unsigned int* pixel = (unsigned int*)renderBuffer.memory + (((i)*renderBuffer.width) + p.x);
+			for (int j = p.x; j < posX2; j++) {
+				*pixel++ = color;
+			}
 		}
+	}
+	else {
+		DrawLine(p, Point(posX2, p.y));
+		DrawLine(p, Point(p.x, posY2));
+		DrawLine(Point(p.x, posY2), Point(posX2, posY2));
+		DrawLine(Point(posX2, posY2), Point(posX2, p.y));
 	}
 }
 
-void DrawRectDynamicPosition(float x, float y, float width, float height, int color = DEFAULT_COLOR)
+void DrawSquare(Point p, int size, int color = DEFAULT_COLOR, bool fill = true) {
+
+	if (fill) {
+		for (int y = p.y; y <= p.y + size; y++) {
+			DrawLine(Point(p.x, y), Point(p.x + size, y));
+		}
+	}
+	else {
+		int x2 = p.x + size;
+		int y2 = p.y + size;
+
+		DrawLine(p, Point(x2, p.y));				// Horizontal top
+		DrawLine(p, Point(p.x, y2));				// Vertical left
+		DrawLine(Point(p.x, y2), Point(x2, y2));	// Horizontal bottom
+		DrawLine(Point(x2, p.y), Point(x2, y2));	// Vertical right
+
+	}
+
+}
+
+void DrawRectDynamicPosition(float x, float y, float width, float height, int color = DEFAULT_COLOR, bool fill = true)
 {
 	x /= 100;
 	y /= 100;
@@ -102,10 +135,10 @@ void DrawRectDynamicPosition(float x, float y, float width, float height, int co
 	y -= (height / 2);
 	Point p((int)x, (int)y);
 
-	DrawRect(p, (int)width, (int)height, color);
+	DrawRect(p, (int)width, (int)height, color, fill);
 }
 
-void DrawRectDynamicPosAndSize(float x, float y, float width, float height, int color = DEFAULT_COLOR)
+void DrawRectDynamicPosAndSize(float x, float y, float width, float height, int color = DEFAULT_COLOR, bool fill = true)
 {
 	Bracket(0, 100, (int)x);
 	Bracket(0, 100, (int)y);
@@ -120,12 +153,12 @@ void DrawRectDynamicPosAndSize(float x, float y, float width, float height, int 
 	y -= (height / 2);
 	Point p((int)x, (int)y);
 
-	DrawRect(p, (int)width, (int)height, color);
+	DrawRect(p, (int)width, (int)height, color, fill);
 }
 
-void DrawTriangle(Point p1, Point p2, Point p3, int color = DEFAULT_COLOR, bool wireframe=true)
+void DrawTriangle(Point p1, Point p2, Point p3, int color = DEFAULT_COLOR, bool fill=true)
 {
-	if (wireframe) {
+	if (fill) {
 		DrawLine(p1, p2);
 		DrawLine(p2, p3);
 		DrawLine(p3, p1);
@@ -137,7 +170,26 @@ void DrawTriangle(Point p1, Point p2, Point p3, int color = DEFAULT_COLOR, bool 
 		if (p3.y < p2.y) Swap(p3, p2);
 		if (p2.y < p1.y) Swap(p2, p1);
 
-		//
+		// Barycentric algo
+		// drawing like an imaginary box around the triangle, going through each pixel in the
+		// box and determining whether that pixel is in the triangle. If it is, plot it.
+
+		// Making imaginary box
+		int maxX = (p1.x > p2.x) ? ((p1.x > p3.x) ? p1.x : p3.x) : ((p2.x > p3.x) ? p2.x : p3.x);
+		int minX = (p1.x < p2.x) ? ((p1.x < p3.x) ? p1.x : p3.x) : ((p2.x < p3.x) ? p2.x : p3.x);
+		int maxY = (p1.y > p2.y) ? ((p1.y > p3.y) ? p1.y : p3.y) : ((p2.y > p3.y) ? p2.y : p3.y);
+		int minY = (p1.y < p2.y) ? ((p1.y < p3.y) ? p1.y : p3.y) : ((p2.y < p3.y) ? p2.y : p3.y);
+
+		Point ps1(p2.x - p1.x, p2.y - p1.y);
+		Point ps2(p3.x - p1.x, p3.y - p1.y);
+
+		for (int x = minX; x <= maxX; x++) {
+			for (int y = minY; y <= maxY; y++) {
+				Point temp(x - p1.x, y - p1.y);
+
+				float a = crossProd
+			}
+		}
 	}
 }
 
