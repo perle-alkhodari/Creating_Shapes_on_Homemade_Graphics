@@ -1,5 +1,6 @@
 #define BACKGROUND_COLOR 0x237458
 
+
 struct Player {
 	float xPos = 50;
 	float yPos = 50;
@@ -17,18 +18,22 @@ void simulate_game(Input* input);
 void simulate_game(Input* input)
 {
 	ClearScreen(BACKGROUND_COLOR);
-
+	bool xInRange = IsInRange(0, renderBuffer.width, player.xPos);
+	bool yInRange = IsInRange(0, renderBuffer.height, player.yPos);
 	if (isPressed(BUTTON_UP)) {
-		player.yPos += 1;
+		if (yInRange) player.yPos += 2;
 	}
 	if (isPressed(BUTTON_LEFT)) {
-		player.xPos -= 1;
+		if (xInRange)
+		player.xPos -= 2;
 	}
 	if (isPressed(BUTTON_DOWN)) {
-		player.yPos -= 1;
+		if (yInRange)
+		player.yPos -= 2;
 	}
 	if (isPressed(BUTTON_RIGHT)) {
-		player.xPos += 1;
+		if (xInRange)
+		player.xPos += 2;
 	}
 	DrawRectDynamicPosAndSize(player.xPos, player.yPos, player.xSize, player.ySize, player.color);
 }

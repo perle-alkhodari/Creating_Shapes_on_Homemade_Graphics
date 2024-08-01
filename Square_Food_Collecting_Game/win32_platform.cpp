@@ -1,14 +1,15 @@
 #include <windows.h>
+#include "structs.cpp"
 
 bool isRunning = true;
 
 // storing all the buffer variables in a struct
 // to keep things organised.
-struct RenderBuffer {
-	int width, height, size;
-	void* memory;
-	BITMAPINFO bitmapInfo;
-};
+//struct RenderBuffer {
+//	int width, height, size;
+//	void* memory;
+//	BITMAPINFO bitmapInfo;
+//};
 RenderBuffer renderBuffer;
 // for renderer to have access right click on file and
 // exclude it from build.
@@ -50,7 +51,7 @@ int WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)
 	HWND window = CreateWindowEx(
 		0,									// Optional window styles.
 		windowClass.lpszClassName,				// Window class
-		L"Learn to Program Windows",		// Window text
+		L"Perle's Shape Algos",		// Window text
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,   // Window style
 
 											// Size and position
@@ -117,6 +118,9 @@ int WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)
 
 // Sim
 		simulate_game(&input);
+		Point p(100, 0);
+		DrawPoint(p);
+		DrawLine(Point(100, 200), Point(60, 500));
 
 // Refresh
 		// Need the Device Context, Buffer information, and the Bitmap Info
@@ -140,7 +144,7 @@ LRESULT CALLBACK WindowCallback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		renderBuffer.width = rect.right - rect.left;
 		renderBuffer.height = rect.bottom - rect.top;
 
-		// number of pixels     size of each pixel
+									// number of pixels                   size of each pixel
 		renderBuffer.size = (renderBuffer.width * renderBuffer.height) * sizeof(unsigned int);
 		// Checking if bufferMemory contains stuff in it, if it does
 		// we will free that space and make a new one in place of it
