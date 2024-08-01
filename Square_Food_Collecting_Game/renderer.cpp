@@ -52,27 +52,29 @@ void DrawPoint(Point p, int color = DEFAULT_COLOR) {
 }
 
 void DrawLine(Point p1, Point p2, int color = DEFAULT_COLOR) {
-	// Bracket for first point
-	p1.x = Bracket(0, renderBuffer.width, p1.x);
-	p1.y = Bracket(0, renderBuffer.height, p1.y);	
+	// Bresenham's line drawing algo
+	int dx = abs(p2.x - p1.x);
+	int sx = p1.x < p2.x ? 1 : -1;
+	int dy = -abs(p2.y - p1.y);
+	int sy = p1.y < p2.y ? 1 : -1;
+	int err = dx + dy;
 
-	// Bracket for second point
-	p2.x = Bracket(0, renderBuffer.width, p2.x);
-	p2.y = Bracket(0, renderBuffer.height, p2.y);
-
-	// In case x2 < x1
-	if (p2.x < p1.x) Swap(p1.x, p2.x), Swap(p1.y, p2.y);
-
-	// Get line slope (m)
-	float mSlope = (float)(p2.y - p1.y) / (float)(p2.x - p1.x);
-
-	int y;
-	Point p;
-	for (int i = p1.x; i <= p2.x; i++) {
-		y = (mSlope * (i - p1.x)) + p1.y;
-		p = Point(i, y);
-		DrawPoint(p, color);
+	while (true) {
+		DrawPoint(p1);
+		if (p1.x == p2.x && p1.y == p2.y) break;
+		int e2 = 2 * err;
+		if (e2 >= dy) {
+			if (p1.x == p2.x) break;
+			err += dy;
+			p1.x += sx;
+		}
+		if (e2 <= dx) {
+			if (p1.y == p2.y) break;
+			err += dx;
+			p1.y += sy;
+		}
 	}
+	
 }
 
 void DrawRect(Point p, int width, int height, int color = DEFAULT_COLOR) {
@@ -127,6 +129,15 @@ void DrawTriangle(Point p1, Point p2, Point p3, int color = DEFAULT_COLOR, bool 
 		DrawLine(p1, p2);
 		DrawLine(p2, p3);
 		DrawLine(p3, p1);
+	}
+
+	else {
+		// Sort y points
+		if (p3.y < p1.y) Swap(p3, p1);
+		if (p3.y < p2.y) Swap(p3, p2);
+		if (p2.y < p1.y) Swap(p2, p1);
+
+		//
 	}
 }
 

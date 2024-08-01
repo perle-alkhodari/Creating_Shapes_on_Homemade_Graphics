@@ -2,6 +2,7 @@
 int Bracket(int minVal, int maxVal, int val);
 bool IsInRange(int minVal, int maxVal, int val);
 void Swap(int& a, int& b);
+void Swap(Point& p1, Point& p2);
 
 
 int Bracket(int minVal, int maxVal, int val) {
@@ -20,4 +21,9 @@ void Swap(int& a, int& b) {
 	int c = a;
 	a = b;
 	b = c;
+}
+
+void Swap(Point& p1, Point& p2) {
+	Swap(p1.x, p2.x);
+	Swap(p1.y, p2.y);
 }

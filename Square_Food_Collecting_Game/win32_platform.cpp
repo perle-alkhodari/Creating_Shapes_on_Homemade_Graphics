@@ -118,9 +118,8 @@ int WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)
 
 // Sim
 		simulate_game(&input);
-		Point p(100, 0);
-		DrawPoint(p);
-		DrawLine(Point(100, 200), Point(60, 500));
+		Point p1(300, 20), p2(30, 200), p3(432, 123);
+		DrawTriangle(p1, p2, p3);
 
 // Refresh
 		// Need the Device Context, Buffer information, and the Bitmap Info
