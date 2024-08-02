@@ -120,10 +120,12 @@ int WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)
 		simulate_game(&input);
 
 		// Testing out my shapes
-		DrawRect(Point(3, 23), 234, 111, 0xffffff, false);
-		DrawSquare(Point(300, 400), 200, 0xffffff, false);
-		DrawRect(Point(899, 234), 133, 600, 0xffffff, true);
-		DrawTriangle(Point(23, 41), Point(245, 77), Point(234, 500));
+		//DrawRect(Point(3, 23), 234, 111, 0xffffff, false);
+		//DrawSquare(Point(300, 400), 200, 0xffffff, false);
+		//DrawRect(Point(899, 234), 133, 600, 0xffffff, true);
+		//DrawTriangle(Point(23, 41), Point(245, 77), Point(234, 500));
+		//DrawRectDynamicPosAndSize(45, 45, 45, 45);
+		DrawCircle(Point(renderBuffer.width/2, renderBuffer.height/2), 0xF0C900);
 
 // Refresh
 		// Need the Device Context, Buffer information, and the Bitmap Info

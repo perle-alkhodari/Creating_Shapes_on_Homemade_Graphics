@@ -1,4 +1,6 @@
 #include "helpers.cpp"
+#include <math.h>
+#include <vector>
 
 #define DEFAULT_COLOR 0xffffff
 
@@ -13,6 +15,7 @@ void DrawRectDynamicPosition(float x, float y, float width, float height, int co
 void DrawRectDynamicPosAndSize(float x, float y, float width, float height, int color, bool fill);
 void DrawTriangle(Point p1, Point p2, Point p3, int color, bool fill);
 void DrawSquare(Point p, int size, int color, bool fill);
+void DrawCircle(Point p, int color, int smoothness);
 
 
 void Render(){ 
@@ -201,6 +204,47 @@ void DrawTriangle(Point p1, Point p2, Point p3, int color = DEFAULT_COLOR, bool 
 			}
 
 		}
+	}
+}
+
+
+// My own circle drawing algorithm. To date this might be my biggest pride lol.
+// I save 4 points in each iteration, one point for each quadrant, all based on the first point, 
+// calculated with sin and cos. Then I draw a line connected the previous point of each quadrant
+// to the current point of each quadrant. :).
+void DrawCircle(Point origin = Point(0, 0), int color = DEFAULT_COLOR, int smoothness = 500) {
+	smoothness = Bracket(3, 1501, smoothness);
+
+	float half_pi = 1.57;
+	float inc = half_pi / smoothness;
+
+	Point previousQ1;
+	Point previousQ2;
+	Point previousQ3;
+	Point previousQ4;
+
+	float r = 100;
+
+	for (float a = 0; a <= half_pi; a += inc) {
+		int x = r * cos(a) + origin.x;
+		int y = r * sin(a) + origin.y;
+
+		Point p(x, y);		
+		Point pQ2(2 * origin.x - p.x, p.y);
+		Point pQ3(2 * origin.x - p.x, 2 * origin.y - p.y);
+		Point pQ4(p.x, 2 * origin.y - p.y);
+
+		if (a != 0) {
+			DrawLine(previousQ1, p, color);
+			DrawLine(previousQ2, pQ2, color);
+			DrawLine(previousQ3, pQ3, color);
+			DrawLine(previousQ4, pQ4, color);
+		}
+
+		previousQ1 = p;
+		previousQ2 = pQ2;
+		previousQ3 = pQ3;
+		previousQ4 = pQ4;
 	}
 }
 
