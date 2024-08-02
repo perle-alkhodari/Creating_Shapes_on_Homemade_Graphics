@@ -7,7 +7,6 @@ void Swap(int& a, int& b);
 void Swap(Point& p1, Point& p2);
 void Bracket(int screenWidth, int screenHeight, Point &p);
 float GetMagnitude(Point p);
-float GetCrossProduct(Point p1, Point p2);
 
 ///
 /// This function is supposed to make sure a value
@@ -28,14 +27,6 @@ void Bracket(int screenWidth, int screenHeight, Point& p) {
 float GetMagnitude(Point p)
 {
 	return sqrt(pow(p.x, 2) + pow(p.y, 2));
-}
-
-float GetCrossProduct(Point p1, Point p2)
-{
-	float mP1 = GetMagnitude(p1);
-	float mP2 = GetMagnitude(p2);
-	// unfinished
-
 }
 
 bool IsInRange(int minVal, int maxVal, int val) {

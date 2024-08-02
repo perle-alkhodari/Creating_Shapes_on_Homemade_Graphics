@@ -158,37 +158,48 @@ void DrawRectDynamicPosAndSize(float x, float y, float width, float height, int 
 
 void DrawTriangle(Point p1, Point p2, Point p3, int color = DEFAULT_COLOR, bool fill=true)
 {
+	DrawLine(p1, p2);
+	DrawLine(p2, p3);
+	DrawLine(p3, p1);
+
 	if (fill) {
-		DrawLine(p1, p2);
-		DrawLine(p2, p3);
-		DrawLine(p3, p1);
-	}
 
-	else {
+
 		// Sort y points
-		if (p3.y < p1.y) Swap(p3, p1);
-		if (p3.y < p2.y) Swap(p3, p2);
-		if (p2.y < p1.y) Swap(p2, p1);
-
+		if (p1.y < p2.y) Swap(p1, p2);
+		if (p1.y < p3.y) Swap(p1, p3);
 		// Barycentric algo
 		// drawing like an imaginary box around the triangle, going through each pixel in the
 		// box and determining whether that pixel is in the triangle. If it is, plot it.
 
+		float y1 = p1.y;
+		float y2 = p2.y;
+		float y3 = p3.y;
+
+		float x1 = p1.x;
+		float x2 = p2.x;
+		float x3 = p3.x;
+
 		// Making imaginary box
-		int maxX = (p1.x > p2.x) ? ((p1.x > p3.x) ? p1.x : p3.x) : ((p2.x > p3.x) ? p2.x : p3.x);
-		int minX = (p1.x < p2.x) ? ((p1.x < p3.x) ? p1.x : p3.x) : ((p2.x < p3.x) ? p2.x : p3.x);
-		int maxY = (p1.y > p2.y) ? ((p1.y > p3.y) ? p1.y : p3.y) : ((p2.y > p3.y) ? p2.y : p3.y);
-		int minY = (p1.y < p2.y) ? ((p1.y < p3.y) ? p1.y : p3.y) : ((p2.y < p3.y) ? p2.y : p3.y);
+		int minx = (int)min(x1, min(x2, x3));
+		int maxx = (int)max(x1, max(x2, x3));
+		int miny = (int)min(y1, min(y2, y3));
+		int maxy = (int)max(y1, max(y2, y3));
 
-		Point ps1(p2.x - p1.x, p2.y - p1.y);
-		Point ps2(p3.x - p1.x, p3.y - p1.y);
-
-		for (int x = minX; x <= maxX; x++) {
-			for (int y = minY; y <= maxY; y++) {
-				Point temp(x - p1.x, y - p1.y);
-
-				float a = crossProd
+		// Square containing triangle
+		for (int y = miny; y <= maxy; y++)
+		{
+			for (int x = minx; x <= maxx; x++)
+			{
+				// half space function calcs
+				if ((x1 - x2) * (y - y1) - (y1 - y2) * (x - x1) < 0 &&
+					(x2 - x3) * (y - y2) - (y2 - y3) * (x - x2) < 0 &&
+					(x3 - x1) * (y - y3) - (y3 - y1) * (x - x3) < 0)
+				{
+					DrawPoint(Point(x, y), color);
+				}
 			}
+
 		}
 	}
 }

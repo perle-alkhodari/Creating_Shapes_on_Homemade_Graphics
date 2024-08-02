@@ -123,9 +123,7 @@ int WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)
 		DrawRect(Point(3, 23), 234, 111, 0xffffff, false);
 		DrawSquare(Point(300, 400), 200, 0xffffff, false);
 		DrawRect(Point(899, 234), 133, 600, 0xffffff, true);
-		DrawTriangle(Point(23, 41), Point(245, 77), Point(234, 655));
-		DrawLine(Point(300, 200), Point(200, 20));
-		DrawRectDynamicPosAndSize(20, 50, 20, 20, 0x0000ff, false);
+		DrawTriangle(Point(23, 41), Point(245, 77), Point(234, 500));
 
 // Refresh
 		// Need the Device Context, Buffer information, and the Bitmap Info
