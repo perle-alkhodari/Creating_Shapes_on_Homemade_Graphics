@@ -15,7 +15,7 @@ void DrawRectDynamicPosition(float x, float y, float width, float height, int co
 void DrawRectDynamicPosAndSize(float x, float y, float width, float height, int color, bool fill);
 void DrawTriangle(Point p1, Point p2, Point p3, int color, bool fill);
 void DrawSquare(Point p, int size, int color, bool fill);
-void DrawCircle(Point p, int color, int smoothness);
+void DrawCircle(Point p, int radius, int color, int smoothness);
 
 
 void Render(){ 
@@ -212,8 +212,13 @@ void DrawTriangle(Point p1, Point p2, Point p3, int color = DEFAULT_COLOR, bool 
 // I save 4 points in each iteration, one point for each quadrant, all based on the first point, 
 // calculated with sin and cos. Then I draw a line connected the previous point of each quadrant
 // to the current point of each quadrant. :).
-void DrawCircle(Point origin = Point(0, 0), int color = DEFAULT_COLOR, int smoothness = 500) {
+void DrawCircle(Point origin, int radius, int color = DEFAULT_COLOR, int smoothness = 500) {
+
+	// Bracketing the radius and smoothness.
 	smoothness = Bracket(3, 1501, smoothness);
+	int maxRadius = min(renderBuffer.width - origin.x, min(renderBuffer.height - origin.y, min(origin.x, origin.y)));
+	radius = Bracket(0, maxRadius, radius);
+
 
 	float half_pi = 1.57;
 	float inc = half_pi / smoothness;
@@ -223,11 +228,9 @@ void DrawCircle(Point origin = Point(0, 0), int color = DEFAULT_COLOR, int smoot
 	Point previousQ3;
 	Point previousQ4;
 
-	float r = 100;
-
 	for (float a = 0; a <= half_pi; a += inc) {
-		int x = r * cos(a) + origin.x;
-		int y = r * sin(a) + origin.y;
+		int x = radius * cos(a) + origin.x;
+		int y = radius * sin(a) + origin.y;
 
 		Point p(x, y);		
 		Point pQ2(2 * origin.x - p.x, p.y);
