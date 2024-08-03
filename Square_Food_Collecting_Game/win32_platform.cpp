@@ -15,6 +15,7 @@ RenderBuffer renderBuffer;
 // exclude it from build.
 #include "renderer.cpp"
 #include "buttons.cpp"
+
 //void* bufferMemory;
 //int bufferWidth;
 //int bufferHeight;
@@ -125,7 +126,9 @@ int WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow)
 		//DrawRect(Point(899, 234), 133, 600, 0xffffff, true);
 		//DrawTriangle(Point(23, 41), Point(245, 77), Point(234, 500));
 		//DrawRectDynamicPosAndSize(45, 45, 45, 45);
-		DrawCircle(Point(renderBuffer.width/2, renderBuffer.height/2), 10, 0xF0C900);
+		int midpointX = renderBuffer.width / 2;
+		int midpointY = renderBuffer.height / 2;
+		DrawCircle(Point(midpointX,midpointY),30,DEFAULT_COLOR,	true);
 
 // Refresh
 		// Need the Device Context, Buffer information, and the Bitmap Info
