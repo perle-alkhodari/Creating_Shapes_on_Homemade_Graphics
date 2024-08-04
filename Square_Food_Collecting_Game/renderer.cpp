@@ -15,7 +15,8 @@ void DrawRectDynamicPosition(float x, float y, float width, float height, int co
 void DrawRectDynamicPosAndSize(float x, float y, float width, float height, int color, bool fill);
 void DrawTriangle(Point p1, Point p2, Point p3, int color, bool fill);
 void DrawSquare(Point p, int size, int color, bool fill);
-void DrawCircle(Point p, int radius, int color, bool fill, int smoothness);
+void DrawCircle(Point p, float radius, int color, int smoothness);
+void DrawCircleFill(Point p, float radius, int color);
 
 
 void Render(){ 
@@ -68,7 +69,7 @@ void DrawLine(Point p1, Point p2, int color = DEFAULT_COLOR) {
 	int err = dx + dy;
 
 	while (true) {
-		DrawPoint(p1);
+		DrawPoint(p1, color);
 		if (p1.x == p2.x && p1.y == p2.y) break;
 		int e2 = 2 * err;
 		if (e2 >= dy) {
@@ -101,10 +102,10 @@ void DrawRect(Point p, int width, int height, int color = DEFAULT_COLOR, bool fi
 		}
 	}
 	else {
-		DrawLine(p, Point(posX2, p.y));
-		DrawLine(p, Point(p.x, posY2));
-		DrawLine(Point(p.x, posY2), Point(posX2, posY2));
-		DrawLine(Point(posX2, posY2), Point(posX2, p.y));
+		DrawLine(p, Point(posX2, p.y), color);
+		DrawLine(p, Point(p.x, posY2), color);
+		DrawLine(Point(p.x, posY2), Point(posX2, posY2), color);
+		DrawLine(Point(posX2, posY2), Point(posX2, p.y), color);
 	}
 }
 
@@ -119,14 +120,15 @@ void DrawSquare(Point p, int size, int color = DEFAULT_COLOR, bool fill = true) 
 		int x2 = p.x + size;
 		int y2 = p.y + size;
 
-		DrawLine(p, Point(x2, p.y));				// Horizontal top
-		DrawLine(p, Point(p.x, y2));				// Vertical left
-		DrawLine(Point(p.x, y2), Point(x2, y2));	// Horizontal bottom
-		DrawLine(Point(x2, p.y), Point(x2, y2));	// Vertical right
+		DrawLine(p, Point(x2, p.y), color);				// Horizontal top
+		DrawLine(p, Point(p.x, y2), color);				// Vertical left
+		DrawLine(Point(p.x, y2), Point(x2, y2), color);	// Horizontal bottom
+		DrawLine(Point(x2, p.y), Point(x2, y2), color);	// Vertical right
 
 	}
 
 }
+
 
 void DrawRectDynamicPosition(float x, float y, float width, float height, int color = DEFAULT_COLOR, bool fill = true)
 {
@@ -161,9 +163,9 @@ void DrawRectDynamicPosAndSize(float x, float y, float width, float height, int 
 
 void DrawTriangle(Point p1, Point p2, Point p3, int color = DEFAULT_COLOR, bool fill=true)
 {
-	DrawLine(p1, p2);
-	DrawLine(p2, p3);
-	DrawLine(p3, p1);
+	DrawLine(p1, p2, color);
+	DrawLine(p2, p3, color);
+	DrawLine(p3, p1, color);
 
 	if (fill) {
 
@@ -212,14 +214,13 @@ void DrawTriangle(Point p1, Point p2, Point p3, int color = DEFAULT_COLOR, bool 
 // I save 4 points in each iteration, one point for each quadrant, all based on the first point, 
 // calculated with sin and cos. Then I draw a line connected the previous point of each quadrant
 // to the current point of each quadrant. :).
-void DrawCircle(Point origin, float radiusPercent, int color = DEFAULT_COLOR, bool fill = true, int smoothness = 500) {
+void DrawCircle(Point origin, float radiusPercent, int color = DEFAULT_COLOR, int smoothness = 500) {
 
 
 	float percent = radiusPercent / 100;
 	int radius = percent * renderBuffer.height;
 
 	// Bracketing the radius and smoothness.
-	if (fill) smoothness = 900;
 	smoothness = Bracket(3, 1501, smoothness);
 	int maxRadius = min(renderBuffer.width - origin.x, 
 					min(renderBuffer.height - origin.y, 
@@ -256,29 +257,49 @@ void DrawCircle(Point origin, float radiusPercent, int color = DEFAULT_COLOR, bo
 		previousQ4 = pQ4;
 	}
 
-	if (fill) {
-		for (int r = radius-1; r >= 0; r--) {
-			for (float a = 0; a <= half_pi; a += inc) {
-				int x = r * cos(a) + origin.x;
-				int y = r * sin(a) + origin.y;
+}
 
-				Point p(x, y);
-				Point pQ2(2 * origin.x - p.x, p.y);
-				Point pQ3(2 * origin.x - p.x, 2 * origin.y - p.y);
-				Point pQ4(p.x, 2 * origin.y - p.y);
+void DrawCircleFill(Point origin, float radiusPercent, int color)
+{
+	float percent = radiusPercent / 100;
+	int radius = percent * renderBuffer.height;
 
-				if (a != 0) {
-					DrawLine(previousQ1, p, color);
-					DrawLine(previousQ2, pQ2, color);
-					DrawLine(previousQ3, pQ3, color);
-					DrawLine(previousQ4, pQ4, color);
-				}
+	// Bracketing the radius and smoothness.
+	int smoothness = 900;
+	int maxRadius = min(renderBuffer.width - origin.x,
+			min(renderBuffer.height - origin.y,
+			min(origin.x, origin.y)));
+	radius = Bracket(0, maxRadius, radius);
 
-				previousQ1 = p;
-				previousQ2 = pQ2;
-				previousQ3 = pQ3;
-				previousQ4 = pQ4;
+	float half_pi = 1.57;
+	float inc = half_pi / smoothness;
+
+	Point previousQ1;
+	Point previousQ2;
+	Point previousQ3;
+	Point previousQ4;
+
+	for (int r = radius; r >= 0; r--) {
+		for (float a = 0; a <= half_pi; a += inc) {
+			int x = r * cos(a) + origin.x;
+			int y = r * sin(a) + origin.y;
+
+			Point p(x, y);
+			Point pQ2(2 * origin.x - p.x, p.y);
+			Point pQ3(2 * origin.x - p.x, 2 * origin.y - p.y);
+			Point pQ4(p.x, 2 * origin.y - p.y);
+
+			if (a != 0) {
+				DrawLine(previousQ1, p, color);
+				DrawLine(previousQ2, pQ2, color);
+				DrawLine(previousQ3, pQ3, color);
+				DrawLine(previousQ4, pQ4, color);
 			}
+
+			previousQ1 = p;
+			previousQ2 = pQ2;
+			previousQ3 = pQ3;
+			previousQ4 = pQ4;
 		}
 	}
 }
